@@ -1,0 +1,95 @@
+services:
+  # ================= INFRA =================
+  mongodb:
+    image: mongo:latest
+    profiles: ["infra"]
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ================= BACKEND =================
+
+  suite-api:
+    image: ${DOCKER_REPO}/suite-api:${IMAGEM_DEMO_V3}
+    profiles: ["app"]
+    ports:
+      - "${BACKEND_SUITE_API_INTERNAL_PORT}:${BACKEND_SUITE_API_INTERNAL_PORT}"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING}
+      - MONGODB_DATABASE=${MONGODB_DATABASE}
+      - SYSTEM_BASE_CONN=${SYSTEM_BASE_CONN}
+      - FRONTEND_CONN=${INTERNAL_HOST}:${FRONTEND_SUITE_APP_INTERNAL_PORT}
+      - KEEPALIVE_ATTENDANCE_SYSTEM_BACKEND_HOST=${KEEPALIVE_ATTENDANCE_SYSTEM_BACKEND_HOST}
+      - KEEPALIVE_ATTENDANCE_SYSTEM_FRONTEND_HOST=${KEEPALIVE_ATTENDANCE_SYSTEM_FRONTEND_HOST}
+    networks:
+      - app-network
+
+  attendancesystem-api:
+    image: ${DOCKER_REPO}/backend-attendance-system-api:${IMAGEM_DEMO_V3}
+    profiles: ["app"]
+    ports:
+      - "${BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT}:${BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT}"
+    environment:
+      - SYSBASE_URL=${SYSTEM_BASE_CONN}
+      - SystemBaseConn=${SYSTEM_BASE_CONN}
+      - FrotendConn=${EXTERNAL_HOST}:${FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT}
+    networks:
+      - app-network
+
+  # ================= FRONTEND =================
+  config-generator:
+    image: alpine:latest
+    profiles: ["app"]
+    environment:
+      - BACKEND_HOST=${SYSTEM_BASE_HOST}
+      - BACKEND_PORT=${SYSTEM_BASE_PORT}
+      - FRONTEND_SUITE_URL=${EXTERNAL_HOST}:${FRONTEND_SUITE_APP_EXTERNAL_PORT}
+      - FRONTEND_ATTENDANCE_URL=${EXTERNAL_HOST}:${FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT}
+      - FRONTEND_ACCOUNT_URL=${EXTERNAL_HOST}:${FRONTEND_ACCOUNT_APP_EXTERNAL_PORT}
+      - FRONTEND_PEOPLE_URL=${EXTERNAL_HOST}:${FRONTEND_PEOPLE_APP_EXTERNAL_PORT}
+      - BACKEND_SUITE_API_URL=${EXTERNAL_HOST}:${BACKEND_SUITE_API_EXTERNAL_PORT}
+      - BACKEND_ATTENDANCE_API_URL=${EXTERNAL_HOST}:${BACKEND_ATTENDANCESYSTEM_API_EXTERNAL_PORT}
+      - BACKEND_PEOPLE_API_URL=${EXTERNAL_HOST}:${BACKEND_PEOPLE_API_EXTERNAL_PORT}
+      - BACKEND_ACCOUNT_API_URL=${EXTERNAL_HOST}:${BACKEND_ACCOUNT_API_EXTERNAL_PORT}
+    command: >
+      sh -c "apk add --no-cache gettext &&
+            envsubst < /config.template.json > /output/config.json &&
+            echo '✅ Config gerado com sucesso' &&
+            chmod 644 /output/config.json"
+    volumes:
+      - ./config.template.json:/config.template.json
+      - config-volume:/output
+    restart: "no"
+
+  attendancesystem-app:
+    image: ${DOCKER_REPO}/attendancesystem-frontend:${IMAGEM_DEMO_V3}
+    profiles: ["app"]
+    volumes:
+      - config-volume:/config-inject:ro
+    entrypoint: >
+      sh -c "cp /config-inject/config.json /usr/share/nginx/html/config.json &&
+             nginx -g 'daemon off;'"
+    ports:
+      - "${FRONTEND_ATTENDANCESYSTEM_APP_INTERNAL_PORT}:${NGINX_DEFAULT_PORT}"
+    networks:
+      - app-network
+    depends_on:
+      config-generator:
+        condition: service_completed_successfully
+
+networks:
+  app-network:
+    name: attendancesystem-network
+
+volumes:
+  mongodb_data:
+  config-volume:

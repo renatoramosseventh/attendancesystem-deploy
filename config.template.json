@@ -1,0 +1,21 @@
+{
+  "production": true,
+  "backend": {
+    "host": "${BACKEND_HOST}",
+    "port": "${BACKEND_PORT}",
+    "apiPath": "/api/v1.0/"
+  },
+  "urlLgpd": "https://lgpd.seventh.com.br/feedback?product=situator",
+  "modules": {
+    "suite": "${FRONTEND_SUITE_URL}",
+    "attendance": "${FRONTEND_ATTENDANCE_URL}",
+    "account": "${FRONTEND_ACCOUNT_URL}",
+    "people": "${FRONTEND_PEOPLE_URL}"
+  },
+  "api": {
+    "suite": "${BACKEND_SUITE_API_URL}",
+    "people": "${BACKEND_PEOPLE_API_URL}",
+    "account": "${BACKEND_ACCOUNT_API_URL}",
+    "attendance": "${BACKEND_ATTENDANCE_API_URL}"
+  }
+}
