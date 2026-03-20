@@ -5,8 +5,6 @@ ENV_FILE = .env.$(ENV)
 PROJECT_NAME = attendancesystem-$(ENV)
 NETWORK_NAME = attendancesystem-network
 
-include .env.registry
-
 .PHONY: login infra app up reset-network nuke
 
 # ===============================

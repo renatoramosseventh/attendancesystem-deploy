@@ -17,7 +17,8 @@ Antes de começar, certifique-se de que a máquina possui:
 Execute o comando abaixo no terminal da máquina de destino:
 
 ```bash
-curl -fsSL https://bitbucket.org/seventh-ltda/attendancesystem-deploy/raw/main/install.sh | bash
+TOKEN=ghp_xxx DOCKER_USER=usuario DOCKER_PASS=dckr_pat_xxx \
+bash <(curl -fsSL https://raw.githubusercontent.com/renatoramosseventh/attendancesystem-deploy/main/install.sh)
 ```
 
 O instalador irá:
@@ -35,7 +36,8 @@ Se preferir configurar manualmente:
 
 ```bash
 # 1. Clone o repositório
-git clone https://attendancesystem-deploy-readonly:APP_PASSWORD@bitbucket.org/seventh-ltda/attendancesystem-deploy.git attendancesystem
+git clone https://github.com/renatoramosseventh/attendancesystem-deploy
+attendancesystem
 cd attendancesystem
 
 # 2. Edite as configurações

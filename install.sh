@@ -192,13 +192,20 @@ collect_config() {
   echo -e "  ${CYAN}Responda as perguntas abaixo. Pressione ENTER para usar o valor padrão.${NC}\n"
 
   echo -e "  ${BOLD}── Rede ──────────────────────────────────────────${NC}"
-  ask EXTERNAL_HOST "IP ou hostname desta máquina (acesso externo)" "http://192.168.1.100"
-  ask INTERNAL_HOST "IP ou hostname interno (geralmente igual ao externo)" "$EXTERNAL_HOST"
+  ask EXTERNAL_HOST "IP ou hostname externo" "http://192.168.10.1"
+  ask INTERNAL_HOST "IP ou hostname interno" "$EXTERNAL_HOST"
+
+  # Garante http:// nos hosts de rede
+  [[ "$EXTERNAL_HOST" != http://* && "$EXTERNAL_HOST" != https://* ]] && EXTERNAL_HOST="http://$EXTERNAL_HOST"
+  [[ "$INTERNAL_HOST" != http://* && "$INTERNAL_HOST" != https://* ]] && INTERNAL_HOST="http://$INTERNAL_HOST"
 
   echo ""
   echo -e "  ${BOLD}── Sistema Base (legado integrado) ───────────────${NC}"
-  ask SYSTEM_BASE_HOST "IP/hostname do sistema base"   "http://192.168.1.1"
+  ask SYSTEM_BASE_HOST "IP/hostname do sistema base"   "http://192.168.10.2"
   ask SYSTEM_BASE_PORT "Porta do sistema base"         "8080"
+
+  # Garante http:// no sistema base
+  [[ "$SYSTEM_BASE_HOST" != http://* && "$SYSTEM_BASE_HOST" != https://* ]] && SYSTEM_BASE_HOST="http://$SYSTEM_BASE_HOST"
 
   echo ""
   echo -e "  ${BOLD}── Portas dos serviços ───────────────────────────${NC}"
