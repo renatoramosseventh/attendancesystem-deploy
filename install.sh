@@ -123,6 +123,15 @@ confirm() {
   [[ "$resp" =~ ^[sS]$ ]]
 }
 
+ensure_http() {
+  local val="$1"
+  if [[ "$val" != http://* && "$val" != https://* ]]; then
+    echo "http://$val"
+  else
+    echo "$val"
+  fi
+}
+
 # ══════════════════════════════════════════════════════════════
 # 1. Verificar dependências
 # ══════════════════════════════════════════════════════════════
@@ -191,33 +200,51 @@ collect_config() {
   print_step "Configuração do ambiente"
   echo -e "  ${CYAN}Responda as perguntas abaixo. Pressione ENTER para usar o valor padrão.${NC}\n"
 
-  echo -e "  ${BOLD}── Rede ──────────────────────────────────────────${NC}"
-  ask EXTERNAL_HOST "IP ou hostname externo" "http://192.168.10.1"
-  ask INTERNAL_HOST "IP ou hostname interno" "$EXTERNAL_HOST"
+  # ── Hosts ─────────────────────────────────────────────────
+  echo -e "  ${BOLD}── Hosts ─────────────────────────────────────────${NC}"
+  ask INTERNAL_HOST "IP interno desta máquina (rede local)"  "192.168.1.100"
+  ask EXTERNAL_HOST "IP externo desta máquina (acesso remoto)" "$INTERNAL_HOST"
 
-  # Garante http:// nos hosts de rede
-  [[ "$EXTERNAL_HOST" != http://* && "$EXTERNAL_HOST" != https://* ]] && EXTERNAL_HOST="http://$EXTERNAL_HOST"
-  [[ "$INTERNAL_HOST" != http://* && "$INTERNAL_HOST" != https://* ]] && INTERNAL_HOST="http://$INTERNAL_HOST"
+  INTERNAL_HOST=$(ensure_http "$INTERNAL_HOST")
+  EXTERNAL_HOST=$(ensure_http "$EXTERNAL_HOST")
 
+  # ── Sistema Base ───────────────────────────────────────────
   echo ""
   echo -e "  ${BOLD}── Sistema Base (legado integrado) ───────────────${NC}"
-  ask SYSTEM_BASE_HOST "IP/hostname do sistema base"   "http://192.168.10.2"
-  ask SYSTEM_BASE_PORT "Porta do sistema base"         "8080"
+  ask SYSTEM_BASE_HOST         "IP interno do sistema base"    "192.168.1.1"
+  ask SYSTEM_BASE_PORT         "Porta interna do sistema base" "8080"
+  ask SYSTEM_BASE_PORT_EXTERNAL "Porta externa do sistema base" "$SYSTEM_BASE_PORT"
 
-  # Garante http:// no sistema base
-  [[ "$SYSTEM_BASE_HOST" != http://* && "$SYSTEM_BASE_HOST" != https://* ]] && SYSTEM_BASE_HOST="http://$SYSTEM_BASE_HOST"
+  SYSTEM_BASE_HOST=$(ensure_http "$SYSTEM_BASE_HOST")
 
+  # ── Portas internas ────────────────────────────────────────
   echo ""
-  echo -e "  ${BOLD}── Portas dos serviços ───────────────────────────${NC}"
-  ask MONGO_PORT                                  "MongoDB"                       "27017"
-  ask BACKEND_SUITE_API_EXTERNAL_PORT             "Backend Suite API"             "10101"
-  ask BACKEND_PEOPLE_API_EXTERNAL_PORT            "Backend People API"            "10100"
-  ask BACKEND_ATTENDANCESYSTEM_API_EXTERNAL_PORT  "Backend AttendanceSystem API"  "10102"
-  ask BACKEND_ACCOUNT_API_EXTERNAL_PORT           "Backend Account API"           "10103"
-  ask FRONTEND_SUITE_APP_EXTERNAL_PORT            "Frontend Suite"                "4200"
-  ask FRONTEND_PEOPLE_APP_EXTERNAL_PORT           "Frontend People"               "4201"
-  ask FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT "Frontend AttendanceSystem"     "4202"
-  ask FRONTEND_ACCOUNT_APP_EXTERNAL_PORT          "Frontend Account"              "4203"
+  echo -e "  ${BOLD}── Portas internas (dentro da rede local) ────────${NC}"
+  ask BACKEND_SUITE_API_INTERNAL_PORT             "Backend Suite API"             "10101"
+  ask BACKEND_PEOPLE_API_INTERNAL_PORT            "Backend People API"            "10100"
+  ask BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT  "Backend AttendanceSystem API"  "10102"
+  ask BACKEND_ACCOUNT_API_INTERNAL_PORT           "Backend Account API"           "10103"
+  ask FRONTEND_SUITE_APP_INTERNAL_PORT            "Frontend Suite"                "4200"
+  ask FRONTEND_PEOPLE_APP_INTERNAL_PORT           "Frontend People"               "4201"
+  ask FRONTEND_ATTENDANCESYSTEM_APP_INTERNAL_PORT "Frontend AttendanceSystem"     "4202"
+  ask FRONTEND_ACCOUNT_APP_INTERNAL_PORT          "Frontend Account"              "4203"
+
+  # ── Portas externas ────────────────────────────────────────
+  echo ""
+  echo -e "  ${BOLD}── Portas externas (acesso remoto/NAT) ───────────${NC}"
+  ask BACKEND_SUITE_API_EXTERNAL_PORT             "Backend Suite API"             "$BACKEND_SUITE_API_INTERNAL_PORT"
+  ask BACKEND_PEOPLE_API_EXTERNAL_PORT            "Backend People API"            "$BACKEND_PEOPLE_API_INTERNAL_PORT"
+  ask BACKEND_ATTENDANCESYSTEM_API_EXTERNAL_PORT  "Backend AttendanceSystem API"  "$BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT"
+  ask BACKEND_ACCOUNT_API_EXTERNAL_PORT           "Backend Account API"           "$BACKEND_ACCOUNT_API_INTERNAL_PORT"
+  ask FRONTEND_SUITE_APP_EXTERNAL_PORT            "Frontend Suite"                "$FRONTEND_SUITE_APP_INTERNAL_PORT"
+  ask FRONTEND_PEOPLE_APP_EXTERNAL_PORT           "Frontend People"               "$FRONTEND_PEOPLE_APP_INTERNAL_PORT"
+  ask FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT "Frontend AttendanceSystem"     "$FRONTEND_ATTENDANCESYSTEM_APP_INTERNAL_PORT"
+  ask FRONTEND_ACCOUNT_APP_EXTERNAL_PORT          "Frontend Account"              "$FRONTEND_ACCOUNT_APP_INTERNAL_PORT"
+
+  # MongoDB
+  echo ""
+  echo -e "  ${BOLD}── Banco de dados ────────────────────────────────${NC}"
+  ask MONGO_PORT "MongoDB (porta interna)" "27017"
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -241,16 +268,6 @@ EOF
   local KEEPALIVE_BACKEND="${EXTERNAL_HOST}:${BACKEND_ATTENDANCESYSTEM_API_EXTERNAL_PORT}"
   local KEEPALIVE_FRONTEND="${EXTERNAL_HOST}:${FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT}"
 
-  # Internals = externos (simplificado)
-  local BACKEND_SUITE_API_INTERNAL_PORT="$BACKEND_SUITE_API_EXTERNAL_PORT"
-  local BACKEND_PEOPLE_API_INTERNAL_PORT="$BACKEND_PEOPLE_API_EXTERNAL_PORT"
-  local BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT="$BACKEND_ATTENDANCESYSTEM_API_EXTERNAL_PORT"
-  local BACKEND_ACCOUNT_API_INTERNAL_PORT="$BACKEND_ACCOUNT_API_EXTERNAL_PORT"
-  local FRONTEND_SUITE_APP_INTERNAL_PORT="$FRONTEND_SUITE_APP_EXTERNAL_PORT"
-  local FRONTEND_PEOPLE_APP_INTERNAL_PORT="$FRONTEND_PEOPLE_APP_EXTERNAL_PORT"
-  local FRONTEND_ATTENDANCESYSTEM_APP_INTERNAL_PORT="$FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT"
-  local FRONTEND_ACCOUNT_APP_INTERNAL_PORT="$FRONTEND_ACCOUNT_APP_EXTERNAL_PORT"
-
   # ── .env.prod ──────────────────────────────────────────────
   cat > "$BASE_DIR/.env.prod" <<EOF
 ASPNETCORE_ENVIRONMENT=Production
@@ -269,6 +286,7 @@ MONGODB_DATABASE=suitedb
 SYSTEM_BASE_CONN=${SYSTEM_BASE_CONN}
 SYSTEM_BASE_HOST=${SYSTEM_BASE_HOST}
 SYSTEM_BASE_PORT=${SYSTEM_BASE_PORT}
+SYSTEM_BASE_PORT_EXTERNAL=${SYSTEM_BASE_PORT_EXTERNAL}
 
 # ── Hosts ─────────────────────────────────────────────────
 INTERNAL_HOST=${INTERNAL_HOST}
@@ -316,25 +334,24 @@ EOF
 
 show_summary() {
   echo ""
-  echo -e "${CYAN}${BOLD}  ┌─────────────────────────────────────────────┐"
-  echo -e "  │              Resumo da configuração         │"
-  echo -e "  └─────────────────────────────────────────────┘${NC}"
+  echo -e "${CYAN}${BOLD}  ┌─────────────────────────────────────────────────────────┐"
+  echo -e "  │                  Resumo da configuração                 │"
+  echo -e "  └─────────────────────────────────────────────────────────┘${NC}"
   echo ""
-  echo -e "  Host externo  : ${BOLD}${EXTERNAL_HOST}${NC}"
   echo -e "  Host interno  : ${BOLD}${INTERNAL_HOST}${NC}"
-  echo -e "  Sistema base  : ${BOLD}${SYSTEM_BASE_HOST}:${SYSTEM_BASE_PORT}${NC}"
+  echo -e "  Host externo  : ${BOLD}${EXTERNAL_HOST}${NC}"
+  echo -e "  Sistema base  : ${BOLD}${SYSTEM_BASE_HOST}:${SYSTEM_BASE_PORT}${NC} (interno) / porta externa: ${BOLD}${SYSTEM_BASE_PORT_EXTERNAL}${NC}"
   echo ""
-  echo -e "  Backends:"
-  echo -e "    Suite API          → porta ${BOLD}${BACKEND_SUITE_API_EXTERNAL_PORT}${NC}"
-  echo -e "    People API         → porta ${BOLD}${BACKEND_PEOPLE_API_EXTERNAL_PORT}${NC}"
-  echo -e "    AttendanceSystem   → porta ${BOLD}${BACKEND_ATTENDANCESYSTEM_API_EXTERNAL_PORT}${NC}"
-  echo -e "    Account API        → porta ${BOLD}${BACKEND_ACCOUNT_API_EXTERNAL_PORT}${NC}"
-  echo ""
-  echo -e "  Frontends:"
-  echo -e "    Suite              → porta ${BOLD}${FRONTEND_SUITE_APP_EXTERNAL_PORT}${NC}"
-  echo -e "    People             → porta ${BOLD}${FRONTEND_PEOPLE_APP_EXTERNAL_PORT}${NC}"
-  echo -e "    AttendanceSystem   → porta ${BOLD}${FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT}${NC}"
-  echo -e "    Account            → porta ${BOLD}${FRONTEND_ACCOUNT_APP_EXTERNAL_PORT}${NC}"
+  echo -e "  ${CYAN}Serviço                     Interno          Externo${NC}"
+  echo -e "  ─────────────────────────────────────────────────────────"
+  echo -e "  Backend Suite API       → :${BOLD}${BACKEND_SUITE_API_INTERNAL_PORT}${NC}           :${BOLD}${BACKEND_SUITE_API_EXTERNAL_PORT}${NC}"
+  echo -e "  Backend People API      → :${BOLD}${BACKEND_PEOPLE_API_INTERNAL_PORT}${NC}           :${BOLD}${BACKEND_PEOPLE_API_EXTERNAL_PORT}${NC}"
+  echo -e "  Backend Attendance API  → :${BOLD}${BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT}${NC}           :${BOLD}${BACKEND_ATTENDANCESYSTEM_API_EXTERNAL_PORT}${NC}"
+  echo -e "  Backend Account API     → :${BOLD}${BACKEND_ACCOUNT_API_INTERNAL_PORT}${NC}           :${BOLD}${BACKEND_ACCOUNT_API_EXTERNAL_PORT}${NC}"
+  echo -e "  Frontend Suite          → :${BOLD}${FRONTEND_SUITE_APP_INTERNAL_PORT}${NC}            :${BOLD}${FRONTEND_SUITE_APP_EXTERNAL_PORT}${NC}"
+  echo -e "  Frontend People         → :${BOLD}${FRONTEND_PEOPLE_APP_INTERNAL_PORT}${NC}            :${BOLD}${FRONTEND_PEOPLE_APP_EXTERNAL_PORT}${NC}"
+  echo -e "  Frontend Attendance     → :${BOLD}${FRONTEND_ATTENDANCESYSTEM_APP_INTERNAL_PORT}${NC}            :${BOLD}${FRONTEND_ATTENDANCESYSTEM_APP_EXTERNAL_PORT}${NC}"
+  echo -e "  Frontend Account        → :${BOLD}${FRONTEND_ACCOUNT_APP_INTERNAL_PORT}${NC}            :${BOLD}${FRONTEND_ACCOUNT_APP_EXTERNAL_PORT}${NC}"
   echo ""
 }
 
