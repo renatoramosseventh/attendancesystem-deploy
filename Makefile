@@ -98,5 +98,8 @@ nuke-project:
 		-f $(COMPOSE_FILE) \
 		down --volumes --remove-orphans
 
-	@echo "✅ Projeto $(PROJECT_NAME) limpo (containers, volumes e rede)."
-	@echo "   Outros containers e recursos Docker não foram afetados."
+	@echo "🖼️ Removendo imagens do projeto ($(DOCKER_USERNAME))..."
+	- docker images --format '{{.Repository}}:{{.Tag}}' | grep '^$(DOCKER_USERNAME)/' | xargs -r docker rmi -f 2>/dev/null || true
+
+	@echo "✅ Projeto $(PROJECT_NAME) limpo (containers, volumes, rede e imagens)."
+	@echo "   Imagens de infraestrutura preservadas."
