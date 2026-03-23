@@ -228,7 +228,7 @@ load_existing_env() {
 
 collect_hosts() {
   print_section "1. Hosts"
-  ask INTERNAL_HOST "IP interno desta máquina (rede local)"    "${INTERNAL_HOST:-192.168.1.100}"
+  ask INTERNAL_HOST "IP interno desta máquina (rede local)"    "${INTERNAL_HOST:-192.168.10.2}"
   ask EXTERNAL_HOST "IP externo desta máquina (acesso remoto)" "${EXTERNAL_HOST:-$INTERNAL_HOST}"
   INTERNAL_HOST=$(ensure_http "$INTERNAL_HOST")
   EXTERNAL_HOST=$(ensure_http "$EXTERNAL_HOST")
@@ -236,7 +236,7 @@ collect_hosts() {
 
 collect_system_base() {
   print_section "2. Sistema Base (legado integrado)"
-  ask SYSTEM_BASE_HOST "IP/hostname do sistema base"    "${SYSTEM_BASE_HOST:-192.168.1.1}"
+  ask SYSTEM_BASE_HOST "IP/hostname do sistema base"    "${SYSTEM_BASE_HOST:-192.168.10.1}"
   ask SYSTEM_BASE_PORT "Porta do sistema base"          "${SYSTEM_BASE_PORT:-8080}"
   SYSTEM_BASE_HOST=$(ensure_http "$SYSTEM_BASE_HOST")
 }
@@ -454,12 +454,14 @@ start_environment() {
   echo -e "  ╚══════════════════════════════════════════════╝${NC}"
   echo ""
   echo -e "  Acesse o sistema em:"
-  echo -e "  ${CYAN}${BOLD}  ${EXTERNAL_HOST}:${FRONTEND_SUITE_APP_EXTERNAL_PORT}${NC}"
+  echo -e "  ${CYAN}${BOLD}  ${SYSTEM_BASE_HOST}${NC}"
+  echo -e "  Menu do usuário: Monitoramento (beta)"
   echo ""
   echo -e "  Comandos úteis (dentro da pasta ${BOLD}${INSTALL_DIR}${NC}):"
-  echo -e "    ${BOLD}make up${NC}    → sobe todo o ambiente"
+  echo -e "    ${BOLD}make up${NC}    → sobe o projeto"
   echo -e "    ${BOLD}make app${NC}   → sobe apenas a aplicação"
   echo -e "    ${BOLD}make infra${NC} → sobe apenas a infra (MongoDB)"
+  echo -e "    ${BOLD}make nuke-project${NC}  → limpa o projeto"
   echo -e "    ${BOLD}make nuke${NC}  → limpa tudo (cuidado!)"
   echo ""
 }
