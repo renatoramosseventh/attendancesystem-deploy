@@ -30,6 +30,7 @@ NC='\033[0m'
 GITHUB_USER="renatoramosseventh"
 REPO_NAME="attendancesystem-deploy"
 INSTALL_DIR="attendancesystem"
+BRANCH="${BRANCH:-main}"
 ENV_FILE=""
 
 # ══════════════════════════════════════════════════════════════
@@ -178,7 +179,7 @@ clone_repo() {
       print_warn "Usando arquivos existentes sem atualizar."
     fi
   else
-    git clone "$GIT_REPO" "$INSTALL_DIR"
+    git clone --branch "$BRANCH" "$GIT_REPO" "$INSTALL_DIR"
     print_ok "Arquivos baixados em: $(pwd)/${INSTALL_DIR}"
   fi
 
