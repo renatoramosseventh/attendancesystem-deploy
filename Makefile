@@ -7,7 +7,7 @@ NETWORK_NAME = attendancesystem-network
 
 include .env.registry
 
-.PHONY: login infra app up reset-network nuke nuke-project
+.PHONY: login infra app install update reset-network nuke nuke-project
 
 # ===============================
 # 🔐 Docker Hub Login
@@ -50,7 +50,7 @@ app: login
 # ===============================
 # 🔥 Subir TUDO
 # ===============================
-up: login
+install: login
 	@echo "🚀 Subindo ambiente completo ($(PROJECT_NAME))..."
 	docker compose \
 		--project-name $(PROJECT_NAME) \
@@ -59,6 +59,11 @@ up: login
 		--profile app \
 		-f $(COMPOSE_FILE) \
 		up -d
+
+# ===============================
+# 🔄 Atualizar projeto
+# ===============================
+update: nuke-project install
 
 # ===============================
 # 💣 Limpeza TOTAL

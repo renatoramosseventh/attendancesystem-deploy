@@ -45,7 +45,7 @@ nano .env.prod        # ajuste IPs e portas
 nano .env.registry    # credenciais Docker Hub (já preenchido pelo install.sh)
 
 # 3. Suba o ambiente
-make up
+make install
 ```
 
 ---
@@ -54,9 +54,11 @@ make up
 
 | Comando | Descrição |
 |---|---|
-| `make up` | Sobe **todo** o ambiente (infra + app) |
+| `make install` | Sobe **todo** o ambiente (infra + app) |
+| `make update` | Remove imagens do projeto e sobe novamente |
 | `make infra` | Sobe apenas o banco de dados (MongoDB) |
 | `make app` | Sobe apenas a aplicação |
+| `make nuke-project` | Remove containers, volumes e imagens do projeto |
 | `make nuke` | ⚠️ Remove **tudo** (containers, volumes, imagens) |
 
 ---
@@ -67,9 +69,8 @@ Para atualizar o sistema para uma nova versão:
 
 ```bash
 cd attendancesystem
-make nuke         # limpa o ambiente anterior
 git pull          # baixa novos arquivos
-make up           # sobe com a versão atualizada
+make update       # limpa imagens antigas e sobe com a versão atualizada
 ```
 
 ---

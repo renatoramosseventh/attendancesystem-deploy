@@ -198,7 +198,7 @@ load_existing_env() {
   print_warn "Configuração anterior encontrada em ${ENV_FILE}"
 
   if confirm "Deseja apenas subir o ambiente sem reconfigurar?"; then
-    cd "$INSTALL_DIR" && make up && cd ..
+    cd "$INSTALL_DIR" && make install && cd ..
     echo ""
     echo -e "${GREEN}${BOLD}  ✅  Ambiente subido com sucesso!${NC}"
     echo ""
@@ -447,7 +447,7 @@ EOF
 start_environment() {
   print_step "Subindo o ambiente..."
   cd "$INSTALL_DIR"
-  make up
+  make install
   cd ..
 
   echo ""
@@ -460,7 +460,8 @@ start_environment() {
   echo -e "  Menu do usuário: Monitoramento (beta)"
   echo ""
   echo -e "  Comandos úteis (dentro da pasta ${BOLD}${INSTALL_DIR}${NC}):"
-  echo -e "    ${BOLD}make up${NC}    → sobe o projeto"
+  echo -e "    ${BOLD}make install${NC} → sobe o projeto"
+  echo -e "    ${BOLD}make update${NC}  → atualiza o projeto"
   echo -e "    ${BOLD}make app${NC}   → sobe apenas a aplicação"
   echo -e "    ${BOLD}make infra${NC} → sobe apenas a infra (MongoDB)"
   echo -e "    ${BOLD}make nuke-project${NC}  → limpa o projeto"
@@ -488,7 +489,7 @@ main() {
   else
     echo ""
     print_ok "Arquivos gerados. Para subir depois, execute:"
-    echo -e "    ${BOLD}cd ${INSTALL_DIR} && make up${NC}"
+    echo -e "    ${BOLD}cd ${INSTALL_DIR} && make install${NC}"
     echo ""
   fi
 }
