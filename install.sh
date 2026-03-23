@@ -202,7 +202,7 @@ collect_config() {
 
   # ── Hosts ─────────────────────────────────────────────────
   echo -e "  ${BOLD}── Hosts ─────────────────────────────────────────${NC}"
-  ask INTERNAL_HOST "IP interno desta máquina (rede local)"  "192.168.1.100"
+  ask INTERNAL_HOST "IP interno desta máquina (rede local)"  "192.168.10.1"
   ask EXTERNAL_HOST "IP externo desta máquina (acesso remoto)" "$INTERNAL_HOST"
 
   INTERNAL_HOST=$(ensure_http "$INTERNAL_HOST")
@@ -211,11 +211,11 @@ collect_config() {
   # ── Sistema Base ───────────────────────────────────────────
   echo ""
   echo -e "  ${BOLD}── Sistema Base (legado integrado) ───────────────${NC}"
-  ask SYSTEM_BASE_HOST         "IP interno do sistema base"    "192.168.1.1"
-  ask SYSTEM_BASE_PORT         "Porta interna do sistema base" "8080"
-  ask SYSTEM_BASE_PORT_EXTERNAL "Porta externa do sistema base" "$SYSTEM_BASE_PORT"
+  ask SYSTEM_BASE_HOST         "IP externo do sistema base"    "192.168.10.2"
+  ask SYSTEM_BASE_PORT         "Porta externa do sistema base" "8080"
 
   SYSTEM_BASE_HOST=$(ensure_http "$SYSTEM_BASE_HOST")
+
 
   # ── Portas internas ────────────────────────────────────────
   echo ""
@@ -286,7 +286,6 @@ MONGODB_DATABASE=suitedb
 SYSTEM_BASE_CONN=${SYSTEM_BASE_CONN}
 SYSTEM_BASE_HOST=${SYSTEM_BASE_HOST}
 SYSTEM_BASE_PORT=${SYSTEM_BASE_PORT}
-SYSTEM_BASE_PORT_EXTERNAL=${SYSTEM_BASE_PORT_EXTERNAL}
 
 # ── Hosts ─────────────────────────────────────────────────
 INTERNAL_HOST=${INTERNAL_HOST}
@@ -340,7 +339,7 @@ show_summary() {
   echo ""
   echo -e "  Host interno  : ${BOLD}${INTERNAL_HOST}${NC}"
   echo -e "  Host externo  : ${BOLD}${EXTERNAL_HOST}${NC}"
-  echo -e "  Sistema base  : ${BOLD}${SYSTEM_BASE_HOST}:${SYSTEM_BASE_PORT}${NC} (interno) / porta externa: ${BOLD}${SYSTEM_BASE_PORT_EXTERNAL}${NC}"
+  echo -e "  Sistema base  : ${BOLD}${SYSTEM_BASE_HOST}:${SYSTEM_BASE_PORT}${NC} (interno) / porta externa: ${BOLD}${SYSTEM_BASE_PORT}${NC}"
   echo ""
   echo -e "  ${CYAN}Serviço                     Interno          Externo${NC}"
   echo -e "  ─────────────────────────────────────────────────────────"
