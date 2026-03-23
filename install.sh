@@ -229,7 +229,8 @@ load_existing_env() {
 collect_hosts() {
   print_section "1. Hosts"
   ask INTERNAL_HOST "IP interno desta máquina (rede local)"    "${INTERNAL_HOST:-192.168.10.2}"
-  ask EXTERNAL_HOST "IP externo desta máquina (acesso remoto)" "${EXTERNAL_HOST:-$INTERNAL_HOST}"
+  local _ext_default="${EXTERNAL_HOST:-$INTERNAL_HOST}"
+  ask EXTERNAL_HOST "IP externo desta máquina (acesso remoto)" "$_ext_default"
   INTERNAL_HOST=$(ensure_http "$INTERNAL_HOST")
   EXTERNAL_HOST=$(ensure_http "$EXTERNAL_HOST")
 }
