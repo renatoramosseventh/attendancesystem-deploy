@@ -200,7 +200,7 @@ load_existing_env() {
   if confirm "Deseja apenas subir o ambiente sem reconfigurar?"; then
     cd "$INSTALL_DIR" && make install && cd ..
     echo ""
-    echo -e "${GREEN}${BOLD}  ✅  Ambiente subido com sucesso!${NC}"
+    echo -e "${GREEN}${BOLD}  ✅  Ambiente iniciado com sucesso!${NC}"
     echo ""
     exit 0
   fi
