@@ -7,7 +7,7 @@ NETWORK_NAME = attendancesystem-network
 
 include .env.registry
 
-.PHONY: login infra app up reset-network nuke
+.PHONY: login infra app up reset-network nuke nuke-project
 
 # ===============================
 # 🔐 Docker Hub Login
@@ -82,3 +82,21 @@ nuke:
 	- docker network prune -f 2>/dev/null || true
 
 	@echo "🔥 Limpeza GLOBAL concluída."
+
+# ===============================
+# 🧹 Limpeza do projeto
+# ===============================
+nuke-project:
+	@echo "🧹 Limpando o projeto $(PROJECT_NAME)..."
+
+	@echo "🛑 Parando e removendo containers do projeto..."
+	docker compose \
+		--project-name $(PROJECT_NAME) \
+		--env-file $(ENV_FILE) \
+		--profile infra \
+		--profile app \
+		-f $(COMPOSE_FILE) \
+		down --volumes --remove-orphans
+
+	@echo "✅ Projeto $(PROJECT_NAME) limpo (containers, volumes e rede)."
+	@echo "   Outros containers e recursos Docker não foram afetados."
