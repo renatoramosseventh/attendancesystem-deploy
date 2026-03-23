@@ -454,7 +454,7 @@ start_environment() {
   echo -e "  ╚══════════════════════════════════════════════╝${NC}"
   echo ""
   echo -e "  Acesse o sistema em:"
-  echo -e "  ${CYAN}${BOLD}  ${SYSTEM_BASE_HOST}${NC}"
+  echo -e "  ${CYAN}${BOLD}  ${SYSTEM_BASE_CONN}${NC}"
   echo -e "  Menu do usuário: Monitoramento (beta)"
   echo ""
   echo -e "  Comandos úteis (dentro da pasta ${BOLD}${INSTALL_DIR}${NC}):"
