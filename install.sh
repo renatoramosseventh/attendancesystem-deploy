@@ -387,7 +387,6 @@ ASPNETCORE_ENVIRONMENT=Production
 DOCKER_REPO=seventhltda
 IMAGEM_LATEST=latest
 IMAGEM_UNSTABLE_LATEST=unstable-latest
-IMAGEM_V1=v1
 NGINX_DEFAULT_PORT=80
 
 # ── MongoDB ───────────────────────────────────────────────

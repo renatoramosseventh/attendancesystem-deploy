@@ -1,7 +1,7 @@
 services:
   # ================= INFRA =================
   mongodb:
-    image: mongo:latest
+    image: mongo:${IMAGEM_LATEST}
     profiles: ["infra"]
     ports:
       - "${MONGO_PORT}:27017"
@@ -18,7 +18,7 @@ services:
   # ================= BACKEND =================
 
   suite-api:
-    image: ${DOCKER_REPO}/suite-api:${IMAGEM_V1}
+    image: ${DOCKER_REPO}/suite-api:${IMAGEM_UNSTABLE_LATEST}
     profiles: ["app"]
     ports:
       - "${BACKEND_SUITE_API_INTERNAL_PORT}:${BACKEND_SUITE_API_INTERNAL_PORT}"
@@ -34,7 +34,7 @@ services:
       - app-network
 
   attendancesystem-api:
-    image: ${DOCKER_REPO}/backend-attendance-system-api:${IMAGEM_V1}
+    image: ${DOCKER_REPO}/backend-attendance-system-api:${IMAGEM_UNSTABLE_LATEST}
     profiles: ["app"]
     ports:
       - "${BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT}:${BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT}"
@@ -47,7 +47,7 @@ services:
 
   # ================= FRONTEND =================
   config-generator:
-    image: alpine:latest
+    image: alpine:${IMAGEM_LATEST}
     profiles: ["app"]
     environment:
       - BACKEND_HOST=${SYSTEM_BASE_HOST}
@@ -71,7 +71,7 @@ services:
     restart: "no"
 
   attendancesystem-app:
-    image: ${DOCKER_REPO}/attendancesystem-frontend:${IMAGEM_V1}
+    image: ${DOCKER_REPO}/attendancesystem-frontend:${IMAGEM_UNSTABLE_LATEST}
     profiles: ["app"]
     volumes:
       - config-volume:/config-inject:ro
