@@ -18,7 +18,7 @@ services:
   # ================= BACKEND =================
 
   suite-api:
-    image: ${DOCKER_REPO}/suite-api:${IMAGEM_DEMO_V3}
+    image: ${DOCKER_REPO}/suite-api:${IMAGEM_V1}
     profiles: ["app"]
     ports:
       - "${BACKEND_SUITE_API_INTERNAL_PORT}:${BACKEND_SUITE_API_INTERNAL_PORT}"
@@ -34,7 +34,7 @@ services:
       - app-network
 
   attendancesystem-api:
-    image: ${DOCKER_REPO}/backend-attendance-system-api:${IMAGEM_DEMO_V3}
+    image: ${DOCKER_REPO}/backend-attendance-system-api:${IMAGEM_V1}
     profiles: ["app"]
     ports:
       - "${BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT}:${BACKEND_ATTENDANCESYSTEM_API_INTERNAL_PORT}"
@@ -71,7 +71,7 @@ services:
     restart: "no"
 
   attendancesystem-app:
-    image: ${DOCKER_REPO}/attendancesystem-frontend:${IMAGEM_DEMO_V3}
+    image: ${DOCKER_REPO}/attendancesystem-frontend:${IMAGEM_V1}
     profiles: ["app"]
     volumes:
       - config-volume:/config-inject:ro
